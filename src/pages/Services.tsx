@@ -84,8 +84,6 @@ export default function Services() {
       const matchesCar = filterCar === "All" || record.carId === filterCar; 
 
       return matchesSearch && matchesFilter && matchesCar;
-
-      
     })
     .sort((a, b) => {
       if (sortBy === "date_desc") return new Date(b.serviceDate).getTime() - new Date(a.serviceDate).getTime();
@@ -116,18 +114,21 @@ export default function Services() {
       {/* Search and Filters Toolbar */}
       <div className="flex flex-col sm:flex-row gap-3 bg-muted/30 p-3 rounded-lg border">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground shrink-0" />
           <Input 
             placeholder="Search work done, tags, garage..." 
-            className="pl-9 bg-background" 
+            className="pl-9 bg-background w-full" 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="flex gap-2">
+        
+        {/* Changed to a 2-column grid on mobile, flex row on desktop */}
+        <div className="grid grid-cols-2 sm:flex gap-2">
           <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="w-[160px] bg-background">
-              <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
+            {/* Changed width to w-full on mobile, fixed width on desktop */}
+            <SelectTrigger className="w-full sm:w-[140px] bg-background">
+              <Filter className="h-4 w-4 mr-2 shrink-0 text-muted-foreground" />
               <SelectValue placeholder="Type" />
             </SelectTrigger>
             <SelectContent>
@@ -138,9 +139,10 @@ export default function Services() {
               <SelectItem value="Washing">Washing</SelectItem>
             </SelectContent>
           </Select>
+
           <Select value={filterCar} onValueChange={setFilterCar}>
-            <SelectTrigger className="w-[160px] bg-background">
-              <CarIcon className="h-4 w-4 mr-2 text-muted-foreground" />
+            <SelectTrigger className="w-full sm:w-[140px] bg-background">
+              <CarIcon className="h-4 w-4 mr-2 shrink-0 text-muted-foreground" />
               <SelectValue placeholder="All Cars" />
             </SelectTrigger>
             <SelectContent>
@@ -152,8 +154,9 @@ export default function Services() {
           </Select>
 
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-[160px] bg-background">
-              <ArrowUpDown className="h-4 w-4 mr-2 text-muted-foreground" />
+            {/* Made this one span across both columns on mobile */}
+            <SelectTrigger className="col-span-2 sm:col-span-1 w-full sm:w-[140px] bg-background">
+              <ArrowUpDown className="h-4 w-4 mr-2 shrink-0 text-muted-foreground" />
               <SelectValue placeholder="Sort By" />
             </SelectTrigger>
             <SelectContent>
