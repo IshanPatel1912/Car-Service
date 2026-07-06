@@ -136,7 +136,7 @@ export default function ServiceForm({ isOpen, onClose, onSuccess, cars, initialD
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>{initialData ? "Edit Service Record" : "Log New Service"}</DialogTitle>
         </DialogHeader>
@@ -162,11 +162,11 @@ export default function ServiceForm({ isOpen, onClose, onSuccess, cars, initialD
               <Label>Odometer (km) *</Label>
               <Input name="odometer" type="number" required value={formData.odometer} onChange={handleChange} />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 col-span-2 sm:col-span-1">
               <Label>Garage Name *</Label>
               <Input name="garageName" required value={formData.garageName} onChange={handleChange} />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 col-span-2 sm:col-span-1">
               <Label>Service Type *</Label>
               <Select value={formData.serviceType} onValueChange={(v) => setFormData(p => ({ ...p, serviceType: v }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
@@ -181,29 +181,59 @@ export default function ServiceForm({ isOpen, onClose, onSuccess, cars, initialD
           </div>
 
           {/* Itemized Bill Section */}
-          <div className="space-y-3 p-4 bg-muted/50 rounded-lg border">
-            <div className="flex justify-between items-center">
+          <div className="space-y-3 p-3 sm:p-4 bg-muted/50 rounded-lg border">
+            <div className="flex justify-between items-center pb-2">
               <Label className="text-base font-semibold">Itemized Bill</Label>
               <Button type="button" variant="outline" size="sm" onClick={handleAddItem}>
-                <Plus className="h-4 w-4 mr-2" /> Add Item
+                <Plus className="h-4 w-4 sm:mr-2" /> <span className="hidden sm:inline">Add Item</span>
               </Button>
             </div>
             {items.length === 0 && <p className="text-sm text-muted-foreground">No items added yet. Click "Add Item" to list parts/labor.</p>}
             
-            <div className="space-y-2">
+            <div className="space-y-3">
               {items.map((item) => (
-                <div key={item.id} className="flex gap-2 items-center">
-                  <Input placeholder="Part or Labor Name" className="flex-1" value={item.name} required onChange={(e) => handleUpdateItem(item.id, "name", e.target.value)} />
-                  <Input type="number" placeholder="Qty" className="w-20" value={item.quantity} required min="1" onChange={(e) => handleUpdateItem(item.id, "quantity", Number(e.target.value))} />
-                  <Input type="number" placeholder="Total Cost (₹)" className="w-32" value={item.price} required min="0" onChange={(e) => handleUpdateItem(item.id, "price", Number(e.target.value))} />
-                  <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveItem(item.id)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
+                <div key={item.id} className="flex flex-col sm:flex-row gap-2 items-start sm:items-center bg-background border sm:border-transparent p-3 sm:p-0 rounded-md">
+                  <Input 
+                    placeholder="Part or Labor Name" 
+                    className="w-full sm:flex-1" 
+                    value={item.name} 
+                    required 
+                    onChange={(e) => handleUpdateItem(item.id, "name", e.target.value)} 
+                  />
+                  <div className="flex gap-2 w-full sm:w-auto items-center">
+                    <Input 
+                      type="number" 
+                      placeholder="Qty" 
+                      className="w-20" 
+                      value={item.quantity} 
+                      required 
+                      min="1" 
+                      onChange={(e) => handleUpdateItem(item.id, "quantity", Number(e.target.value))} 
+                    />
+                    <Input 
+                      type="number" 
+                      placeholder="Total Cost (₹)" 
+                      className="flex-1 sm:w-32" 
+                      value={item.price} 
+                      required 
+                      min="0" 
+                      onChange={(e) => handleUpdateItem(item.id, "price", Number(e.target.value))} 
+                    />
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="icon" 
+                      className="shrink-0"
+                      onClick={() => handleRemoveItem(item.id)}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
-            <div className="flex justify-end pt-2 text-lg font-bold">
-              Total Auto-Calculated: ₹{totalCost.toLocaleString()}
+            <div className="flex justify-end pt-3 mt-2 border-t text-lg font-bold">
+              Total: ₹{totalCost.toLocaleString()}
             </div>
           </div>
 
@@ -213,15 +243,14 @@ export default function ServiceForm({ isOpen, onClose, onSuccess, cars, initialD
               <Label>Work Done Summary *</Label>
               <Textarea name="workDone" required value={formData.workDone} onChange={handleChange} placeholder="Briefly describe the overall service..." />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 col-span-2 sm:col-span-1">
               <Label>Tags (comma separated)</Label>
               <Input name="tags" placeholder="Oil, Brakes" value={formData.tags} onChange={handleChange} />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 col-span-2 sm:col-span-1">
               <Label>Attach Bill (PDF/Image)</Label>
               <div className="flex items-center gap-2">
-                <Input type="file" accept=".pdf,image/*" onChange={(e) => setBillFile(e.target.files?.[0] || null)} className="file:text-foreground" />
-                <UploadCloud className="h-5 w-5 text-muted-foreground" />
+                <Input type="file" accept=".pdf,image/*" onChange={(e) => setBillFile(e.target.files?.[0] || null)} className="file:text-foreground w-full" />
               </div>
             </div>
           </div>
