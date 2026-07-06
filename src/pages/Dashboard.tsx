@@ -174,7 +174,7 @@ export default function Dashboard() {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₹${value}`} />
-                  <Tooltip cursor={{fill: 'transparent'}} formatter={(value: number) => [`₹${value.toLocaleString()}`, 'Cost']} />
+                  <Tooltip cursor={{fill: 'transparent'}} formatter={(value) => [`₹${Number(value).toLocaleString()}`, 'Cost']} />
                   <Bar dataKey="cost" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -201,11 +201,11 @@ export default function Dashboard() {
                     paddingAngle={5}
                     dataKey="value"
                   >
-                    {categoryData.map((entry, index) => (
+                    {categoryData.map((_entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value: number) => [`₹${value.toLocaleString()}`, 'Total Cost']} />
+                  <Tooltip formatter={(value) => [`₹${Number(value).toLocaleString()}`, 'Total Cost']} />
                   <Legend verticalAlign="bottom" height={36} />
                 </PieChart>
               </ResponsiveContainer>
