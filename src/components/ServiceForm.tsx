@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAuth } from "@/contexts/AuthContext";
 import { addRecord, updateRecord } from "@/services/recordService";
 import { uploadFileToDrive } from "@/services/driveService";
-import { Plus, Trash2, UploadCloud } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { useGoogleLogin } from "@react-oauth/google";
 
 interface ServiceFormProps {
