@@ -33,19 +33,6 @@ export default function ServiceForm({ isOpen, onClose, onSuccess, cars, initialD
   const [items, setItems] = useState<ServiceItem[]>([]);
   const [billFile, setBillFile] = useState<File | null>(null);
 
-  // Google Login Hook to request Drive scope
-  const loginToGoogleDrive = useGoogleLogin({
-    scope: 'https://www.googleapis.com/auth/drive.file',
-    onSuccess: async (tokenResponse) => {
-      await processSave(tokenResponse.access_token);
-    },
-    onError: (error) => {
-      console.error('Google Login Failed:', error);
-      setLoading(false);
-      alert("Failed to connect to Google Drive.");
-    }
-  });
-
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -86,28 +73,48 @@ export default function ServiceForm({ isOpen, onClose, onSuccess, cars, initialD
 
   const totalCost = items.reduce((sum, item) => sum + Number(item.price), 0);
 
-  // Triggered when user clicks Save
-  const handleSubmit = (e: React.FormEvent) => {
+  // Triggered on-the-fly if a token is missing
+  const requestDrivePermission = useGoogleLogin({
+    scope: "https://www.googleapis.com/auth/drive.file",
+    onSuccess: async (tokenResponse) => {
+      // 1. Save the newly acquired token
+      localStorage.setItem("googleDriveToken", tokenResponse.access_token);
+      // 2. Resume the save process automatically
+      await processSave(tokenResponse.access_token);
+    },
+    onError: (error) => {
+      console.error("Google Drive Auth Failed:", error);
+      alert("Permission denied. Cannot upload the bill.");
+      setLoading(false);
+    }
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser || !formData.carId) return;
     setLoading(true);
 
     if (billFile) {
-      // If there is a file, we MUST get Drive permission first
-      loginToGoogleDrive();
+      const existingToken = localStorage.getItem("googleDriveToken");
+      if (existingToken) {
+        // Token exists in memory, upload silently
+        await processSave(existingToken);
+      } else {
+        // Token is missing, trigger the popup
+        requestDrivePermission();
+      }
     } else {
-      // If no file, just save to Firestore directly
-      processSave(null);
+      // No file to upload, skip Drive completely
+      await processSave(null);
     }
   };
 
-  // Separated save logic to handle both with and without Drive upload
-  const processSave = async (googleAccessToken: string | null) => {
+  const processSave = async (driveToken: string | null) => {
     try {
       let uploadedFileId = initialData?.pdfBillId || "";
 
-      if (billFile && googleAccessToken) {
-        uploadedFileId = await uploadFileToDrive(billFile, googleAccessToken);
+      if (billFile && driveToken) {
+        uploadedFileId = await uploadFileToDrive(billFile, driveToken);
       }
 
       const recordPayload = {
@@ -116,7 +123,7 @@ export default function ServiceForm({ isOpen, onClose, onSuccess, cars, initialD
         tags: formData.tags.split(",").map(t => t.trim()).filter(Boolean),
         items,
         totalCost,
-        pdfBillId: uploadedFileId, // Save the Drive ID here
+        pdfBillId: uploadedFileId,
       };
 
       if (initialData?.id) {
@@ -124,11 +131,14 @@ export default function ServiceForm({ isOpen, onClose, onSuccess, cars, initialD
       } else {
         await addRecord(recordPayload);
       }
+      
       onSuccess();
       onClose();
     } catch (error) {
       console.error("Error saving record:", error);
-      alert("An error occurred while saving.");
+      // If the upload failed, the token might be expired. Let's clear it so they are prompted again next time.
+      localStorage.removeItem("googleDriveToken");
+      alert("An error occurred. If uploading a file, your session may have expired. Please try saving again.");
     } finally {
       setLoading(false);
     }
